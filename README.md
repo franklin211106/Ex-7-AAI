@@ -26,46 +26,30 @@ import nltk
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize, sent_tokenize
 from nltk.stem import PorterStemmer
+
 nltk.download('punkt')
 nltk.download('punkt_tab')
 nltk.download('stopwords')
-def preprocess_text(text):
-  words = word_tokenize (text)
-  # Remove stopwords and punctuation
-  stop_words = set(stopwords.words('english'))
-  filtered_words = [word for word in words if word.lower() not in stop_words and word.isalnum()]
-  # Stemming
-  stemmer = PorterStemmer()
-  stemmed_words = [stemmer.stem (word) for word in filtered_words]
-  return stemmed_words 
-def generate_summary (text, num_sentences=3):
-  sentences = sent_tokenize(text)
-  preprocessed_text = preprocess_text(text)
-  # Calculate the frequency of each word
-  word_frequencies = nltk. FreqDist(preprocessed_text)
-  # Calculate the score for each sentence based on word frequency
-  sentence_scores = {}
-  for sentence in sentences:
-    for word, freq in word_frequencies.items():
-      if word in sentence.lower():
-        if sentence not in sentence_scores:
-          sentence_scores [sentence] = freq
-        else:
-          sentence_scores [sentence] += freq
-  # Select top N sentences with highest scores
-  summary_sentences = sorted(sentence_scores, key=sentence_scores.get, reverse=True) [:num_sentences]
-  return''.join(summary_sentences) 
- if __name__=="__main__":
-    input_text ="""
-    Natural language processing (NLP) is a subfield of artificial intelligence.
-    It involves the development of algorithms and models that enact NLP.
-    NLP is used in various applications, including chatbots, language Understanding, and language generation.
-    This program demonstrates a simple text summarization using NLP"""
-summary = generate_summary(input_text)
-print("Origina1 Text: ")
-print (input_text )
-print( " \nSummary : " )
-print(summary)
+
+def preprocess(text):
+    words = word_tokenize(text)
+    stop_words = set(stopwords.words('english'))
+    words = [w for w in words if w.lower() not in stop_words and w.isalnum()]
+    return [PorterStemmer().stem(w) for w in words]
+
+def summarize(text, n=3):
+    sentences = sent_tokenize(text)
+    freq = nltk.FreqDist(preprocess(text))
+    scores = {s: sum(freq[w] for w in freq if w in s.lower()) for s in sentences}
+    return ' '.join(sorted(scores, key=scores.get, reverse=True)[:n])
+
+text = """Natural language processing (NLP) is a subfield of artificial intelligence.
+It involves the development of algorithms and models that enact NLP.
+NLP is used in various applications, including chatbots, language understanding,
+and language generation. This program demonstrates a simple text summarization using NLP."""
+
+print("Original Text:\n", text)
+print("\nSummary:\n", summarize(text))
 
 ```
 
